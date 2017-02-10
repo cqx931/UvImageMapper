@@ -15,7 +15,7 @@ public class Quad {
 	public PImage warped;
 	public PApplet parent;
 	public int id, tries = 0;
-	public float brightness;
+	public float brightness = -1;
 	
 	static int idx = 0;
 	
@@ -265,7 +265,15 @@ public class Quad {
 		
 		if (UvMapper.STROKE_QUAD_OUTLINES) {
 			parent.stroke(50);
-			if (this.warped != null)  parent.fill(200,0,0,32);
+			
+			//draw brightness
+			if(UvMapper.FILL_QUAD_BRIGHTNESS){
+				float c = 150;
+				if (this.brightness != -1) c = this.brightness*255;
+//				System.out.println(this.brightness + " " + c);
+				 parent.fill(c);
+			}
+			
 			parent.quad(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7]);
 		}
 
@@ -330,21 +338,21 @@ public class Quad {
 		
 		}
 		
-//		 Sort the Quads by area
-		quads.sort(new Comparator<Quad>() {
-			
-			public int compare(Quad q1, Quad q2) {
-				
-//				return q1.areaIn3D() > q2.areaIn3D() ? -1 : 1;	
-				return q1.area() > q2.area() ? -1 : 1;
-			}
-		});
-
-		// Constrain to our maximum number post-sort
-		quads = quads.subList(0, Math.min(quads.size(), UvMapper.MAX_NUM_QUADS_TO_LOAD));
-		
-		System.out.println("\nFound " + quads.size()+" Quads with max-area=" + quads.get(0).area()+"\nAssigning images:");
-		
+////		 Sort the Quads by area
+//		quads.sort(new Comparator<Quad>() {
+//			
+//			public int compare(Quad q1, Quad q2) {
+//				
+////				return q1.areaIn3D() > q2.areaIn3D() ? -1 : 1;	
+//				return q1.area() > q2.area() ? -1 : 1;
+//			}
+//		});
+//
+//		// Constrain to our maximum number post-sort
+//		quads = quads.subList(0, Math.min(quads.size(), UvMapper.MAX_NUM_QUADS_TO_LOAD));
+//		
+//		System.out.println("\nFound " + quads.size()+" Quads with max-area=" + quads.get(0).area()+"\nAssigning images:");
+//		
 		return quads;
 	}
 
@@ -381,7 +389,7 @@ public class Quad {
 	
 	public float getBrightness(PImage img, PApplet p) {
 		float avgB = 0;
-		System.out.print("Quad[" + id + "]");
+//		System.out.print("Quad[" + id + "]");
 		
 		int minX,minY,maxX,maxY,count = 0;
 		minX =  (int) Math.floor(bounds[0]);
@@ -405,10 +413,15 @@ public class Quad {
 		 }
 		}
 		
-		this.brightness = avgB/count;
+		this.brightness = avgB/count/255;
 		System.out.println(this.brightness);
 		return this.brightness;
 	}
+	
+	public void setBrightness(float b) {
+	  this.brightness = b;
+	}
+	
   
 	public float s(float a, float b, float c){
 		float s, p = (a + b + c) / 2;

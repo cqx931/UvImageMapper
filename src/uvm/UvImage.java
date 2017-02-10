@@ -12,6 +12,7 @@ public class UvImage {
 	public int width, height;
 	public String imageName, warpName;
 	public ArrayList<Float> appliedAreas;
+	public float brightness = -1;
 
 	public UvImage(PImage image, String imageName) {
 		
@@ -21,6 +22,9 @@ public class UvImage {
 		this.height = this.image.height;
 		this.appliedAreas = new ArrayList<Float>();
 		this.warpName = changeExt(imageName, ".png");
+		//Image Brightness
+		this.brightness = calculateImageBrightness();
+		
 	}
 
 	public String changeExt(String fileName, String ext) {
@@ -50,6 +54,15 @@ public class UvImage {
 		return fromFolder(p, dir, Integer.MAX_VALUE);
 	}
 	
+	public float calculateImageBrightness() {
+		
+		String command =  UvMapper.CONVERT_CMD + UvMapper.IMAGE_DIR + this.imageName + UvMapper.IMAGE_BRIGHTNESS_ARGS;
+//		System.out.println(this.imageName);
+		this.brightness = Terminal.execToFloat(command);
+	
+		return this.brightness;
+	}
+	
 	public static ArrayList<UvImage> fromFolder(PApplet p, String dir, int maxNum) {
 
 		// Load images into UvImage objects
@@ -60,8 +73,8 @@ public class UvImage {
 		ArrayList<UvImage> ads = new ArrayList<UvImage>();
 
 		for (int i = 0; i < files.length; i++) {
-			
-			if (files[i].matches(".*\\.(png|gif|jpg|jpeg)")) {
+			//brightness trouble with gif
+			if (files[i].matches(".*\\.(png|jpg|jpeg)")) {
 				
 				//System.out.println("Trying "+dir+"/"+files[i]);
 				PImage pimg = p.loadImage(dir+"/"+files[i]);
@@ -79,7 +92,17 @@ public class UvImage {
 				break;
 		}
 
-	  // sort the images by area
+	  // sort the images
+		sortImagesByArea (ads);
+//		sortImagesByBrightness (ads);
+//		
+		System.out.println("\nLoaded "+ads.size()+" images");
+		
+		
+		return ads;
+	}
+  
+	public static void sortImagesByArea (ArrayList<UvImage> ads) {
 		ads.sort(new Comparator<UvImage>() {
 
 			public int compare(UvImage img1, UvImage img2) {
@@ -92,12 +115,23 @@ public class UvImage {
 					return 1;
 			}
 		});
-		
-		System.out.println("\nLoaded "+ads.size()+" images");
-		
-		return ads;
 	}
+	
+	public static void sortImagesByBrightness (ArrayList<UvImage> ads) {
+		ads.sort(new Comparator<UvImage>() {
 
+			public int compare(UvImage img1, UvImage img2) {
+				
+				if (img1.brightness > img2.brightness)
+					return -1;
+				else if (img1.brightness == img2.brightness)
+					return 0;
+				else
+					return 1;
+			}
+		});
+	}
+	
 	// True if we have more applications remaining 
 	// and we haven't accepted a quad with this area before
 	public boolean acceptsQuad(Quad quad) {
@@ -110,4 +144,6 @@ public class UvImage {
 //		if (!accepted) System.out.println("Quad#"+quad.id+" rejected for "+imageName);
 		return true;
 	}
+	
+
 }

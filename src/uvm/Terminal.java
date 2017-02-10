@@ -42,7 +42,8 @@ public class Terminal {
 	
 	public static float execToFloat(String command) {
 		
-		return Float.parseFloat(execToString(command));
+	  String result = execToString(command);
+		return Float.parseFloat(result);
 	}
 	
 	public static String execToString(String command) {

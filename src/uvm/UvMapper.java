@@ -10,46 +10,67 @@ public class UvMapper extends PApplet {
 
 	public static boolean CROP_IMGS_TO_QUADS = false;
 	public static boolean STROKE_QUAD_OUTLINES = false;
+	public static boolean FILL_QUAD_BRIGHTNESS = false;
 	public static boolean SCALE_QUADS_TO_DISPLAY = true;
 	
 	public static boolean CHANGE_ORIGIN_TO_BOTTOM_LEFT = true;
 	public static boolean DRAW_QUAD_DEBUG_DATA = false; 
 	public static boolean SHOW_PROGRESS_DOTS = true;
 	
-	public static int MAX_NUM_QUADS_TO_LOAD = 2000, MAX_NUM_IMGS_TO_LOAD = 1600; 
+	public static int MAX_NUM_QUADS_TO_LOAD = 100, MAX_NUM_IMGS_TO_LOAD = 2400; 
 	public static int MAX_USAGES_PER_IMG = 1, MIN_ALLOWED_IMG_AREA = 10;
 
 	public static String DATA_FILE = "data/BerthaData20170205.txt";
+	public static String BRIGHTNESS_FILE = "data/BerthaBrightness.txt";
 	public static String UV_NAME = "BarthaTest.png";
 	public static String IMAGE_DIR = "allImages/", OUTPUT_DIR = "warp/";
 	
 	public static String CONVERT_CMD = "/usr/local/bin/convert ";
 	public static String CONVERT_ARGS = " -matte -mattecolor transparent -virtual-pixel transparent -interpolate Spline +distort BilinearForward ";
-
+  public static String IMAGE_BRIGHTNESS_ARGS = " -colorspace Gray -format \"%[fx:image.mean]\" info:"; 
 	List<Quad> quads;
 	
 	public void settings() {
 
-		size(2000, 2000);
+		size(14000, 14000);
 	}
 
 	public void setup() {
 
 		List<UvImage> ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
 		quads = Quad.fromData(this, DATA_FILE);
-
+		
+		readAllBrightness(this, BRIGHTNESS_FILE);
+		
 		int processed = assignImages(ads, quads);
 		System.out.println("\nProcessed " + processed + "/" + quads.size() + " Quads");
+		
+		Quad.drawAll(quads);
+
 	}
 	
 	public void draw() {
 
-		Quad.drawAll(quads);
+		
 //		Quad.mouseOver(quads);
 	}
 	
 	public void keyPressed() {
 		if (key=='s') saveToFile();
+	}
+	
+	public void readAllBrightness(PApplet p, String dataFilePath) {
+		
+		String[] lines = p.loadStrings(dataFilePath);
+		System.out.println("assign brightness from File");
+		for (int i = 0; i < lines.length; i++) {
+			String data = lines[i].split("]")[1];
+			Quad quad = quads.get(i);	
+			float b = Float.parseFloat(data);
+			quad.setBrightness(b);
+			System.out.print(".");
+		}
+		
 	}
 
 	// Assigning best fiting ad image to each quad
@@ -140,8 +161,8 @@ public class UvMapper extends PApplet {
 	}
 	
 	float distance(UvImage img, Quad q) {
-
 		return Math.abs(img.aspectRation() - q.aspectRatio());
+//		return Math.abs(img.brightness - q.brightness);
 	}
 
 	public static void main(String[] args) {
