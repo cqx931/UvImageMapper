@@ -10,7 +10,8 @@ import processing.core.*;
 public class Quad {
 
 	public UvImage image;
-	public float[] points, bounds,lengths;
+	public float[]  points, bounds;// on canvas
+	public float[]  originalPoints,lengths;//original data
 
 	public PImage warped;
 	public PApplet parent;
@@ -19,14 +20,19 @@ public class Quad {
 	
 	static int idx = 0;
 	
-	public Quad(PApplet p, float[] points, float[] lengths) {
+	public Quad(PApplet p, float[] opts, float[] points, float[] lengths) {
 		
 		this.id = idx++;
 		this.parent = p;
 		this.points = points;
+		this.originalPoints = opts;
 		this.lengths = lengths;
 		this.repairPoints();
 		this.bounds = bounds();
+	}
+	
+	public Quad() {
+		
 	}
 
 	/**
@@ -308,13 +314,13 @@ public class Quad {
 				System.err.println("[WARN] Ignoring invalid quad("+spts.length+"pts): " + line);
 				continue;
 			}
-						
+		  float[] opts  = new float[8];
 			float[] fpts = new float[8];
 			float[] ls = new float [5];
 			
 			for (int i = 0; i < 8; i++) {
 				
-				fpts[i] = Float.parseFloat(spts[i]);
+				opts[i] = fpts[i] = Float.parseFloat(spts[i]);
 				if (UvMapper.SCALE_QUADS_TO_DISPLAY) // do scaling first 
 					fpts[i] *= (i % 2 == 0 ? p.width : p.height);	
 				
@@ -328,31 +334,14 @@ public class Quad {
 				
 			  for(int i = 0; i < 5; i++){
 				  ls[i] = Float.parseFloat(spts[8+i]);
-				  //scaling
-				  ls[i] *= (i % 2 == 0 ? p.width : p.height);
 			  }
 			}
 		
 
-			quads.add(new Quad(p, fpts, ls));
+			quads.add(new Quad(p, opts, fpts, ls));
 		
 		}
 		
-////		 Sort the Quads by area
-//		quads.sort(new Comparator<Quad>() {
-//			
-//			public int compare(Quad q1, Quad q2) {
-//				
-////				return q1.areaIn3D() > q2.areaIn3D() ? -1 : 1;	
-//				return q1.area() > q2.area() ? -1 : 1;
-//			}
-//		});
-//
-//		// Constrain to our maximum number post-sort
-//		quads = quads.subList(0, Math.min(quads.size(), UvMapper.MAX_NUM_QUADS_TO_LOAD));
-//		
-//		System.out.println("\nFound " + quads.size()+" Quads with max-area=" + quads.get(0).area()+"\nAssigning images:");
-//		
 		return quads;
 	}
 
@@ -361,6 +350,31 @@ public class Quad {
 		for (Quad q : quads) {
 			q.draw();
 		}
+	}
+	
+	public static List<Quad> sortByArea(List<Quad> quads) {
+
+		quads.sort(new Comparator<Quad>() {
+
+			public int compare(Quad q1, Quad q2) {
+
+//				 return q1.areaIn3D() > q2.areaIn3D() ? -1 : 1;
+				return q1.area() > q2.area() ? -1 : 1;
+			}
+		});
+
+//		 Constrain to our maximum number post-sort
+		quads = quads.subList(0, Math.min(quads.size(), UvMapper.MAX_NUM_QUADS_TO_LOAD));
+
+		System.out.println("\nFound " + quads.size() + " Quads with max-area=" + quads.get(0).area() + " " + quads.get(0).areaIn3D());
+	  
+//		for (int j = 0; j < 4; j++) {
+//			//+ quads.get(0).points[2*j] + ","+ quads.get(0).points[2*j+1]  "; "
+//		System.out.println("point[" + j + "]:"  + quads.get(0).originalPoints[2*j] + "," + quads.get(0).originalPoints[2*j + 1]);
+//		System.out.println(" ls" + j + ":" + quads.get(0).lengths[j]);
+//		}
+		
+		return quads;
 	}
 	
 	public float area() {
@@ -383,6 +397,8 @@ public class Quad {
 		
 		t1 = s(ls[0],ls[1],ls[4]);
 		t2 = s(ls[2],ls[3],ls[4]);
+		
+//		System.out.println("t1:" + t1 + "t2:" + t2);
 	
 		return t1 + t2;
 	}

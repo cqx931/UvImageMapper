@@ -23,7 +23,11 @@ public class UvImage {
 		this.appliedAreas = new ArrayList<Float>();
 		this.warpName = changeExt(imageName, ".png");
 		//Image Brightness
-		this.brightness = calculateImageBrightness();
+//		this.brightness = calculateImageBrightness();
+		
+	}
+	
+	public UvImage() {
 		
 	}
 
@@ -97,7 +101,7 @@ public class UvImage {
 //		sortImagesByBrightness (ads);
 //		
 		System.out.println("\nLoaded "+ads.size()+" images");
-		
+
 		
 		return ads;
 	}

@@ -64,15 +64,17 @@ public class BrightnessCalculator extends PApplet{
 	  for (int i = 0; i < count.length; i++) {
 	  	System.out.println("0." + i + "- 0." + (i+1) + ":" + count[i]);
 	  }
+//	  
+//    ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
+//    calculateImagesBrightness();
+//    
+//	System.out.println("Brightness range of Images: ");
+//		
+//	  for (int i = 0; i < imageCount.length; i++) {
+//	  	System.out.println("0." + i + "- 0." + (i+1) + ":" + imageCount[i]);
+//	  }
+//	  
 	  
-    ads = UvImage.fromFolder(this, IMAGE_DIR, MAX_NUM_IMGS_TO_LOAD);
-    calculateImagesBrightness();
-    
-	System.out.println("Brightness range of Images: ");
-		
-	  for (int i = 0; i < imageCount.length; i++) {
-	  	System.out.println("0." + i + "- 0." + (i+1) + ":" + imageCount[i]);
-	  }
 	  
 	}
 	
